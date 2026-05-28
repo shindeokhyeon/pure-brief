@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>퓨어약국 콘텐츠 기획서</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yellow: #FFFA4D;
+    --black: #0D0D0D;
+    --white: #FAFAF7;
+    --gray: #E8E8E8;
+    --gray-mid: #AAAAAA;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Noto Sans KR', sans-serif;
+  }
+  body { background: #E2E2DE; font-family: var(--sans); font-size: 13px; color: var(--black); padding: 40px 24px 80px; }
+  @media print {
+    body { background: white; padding: 0; }
+    .toolbar, .add-slide-btn, .del-btn, .cap-trans-row { display: none !important; }
+    .sheet { box-shadow: none; }
+  }
+
+  .toolbar { max-width: 800px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center; }
+  .toolbar-id { font-family: var(--mono); font-size: 10px; color: #666; letter-spacing: .1em; }
+  .btn { background: var(--black); color: var(--yellow); border: none; padding: 7px 18px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; cursor: pointer; }
+  .btn:hover { background: #333; }
+
+  .sheet { max-width: 800px; margin: 0 auto; background: var(--white); box-shadow: 0 4px 28px rgba(0,0,0,.11); }
+
+  .header { background: var(--black); padding: 28px 32px 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .header-brand { font-family: var(--mono); font-size: 9px; letter-spacing: .2em; color: #555; margin-bottom: 6px; }
+  .header-title { font-size: 22px; font-weight: 500; color: var(--yellow); }
+  .doc-num-label { font-family: var(--mono); font-size: 9px; color: #555; letter-spacing: .12em; margin-bottom: 4px; text-align: right; }
+  .doc-num { font-family: var(--mono); font-size: 12px; color: white; }
+
+  .fields { padding: 0 32px 32px; }
+  .field-row { border-bottom: 1px solid var(--gray); padding: 20px 0; display: grid; grid-template-columns: 130px 1fr; gap: 20px; align-items: start; }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-family: var(--mono); font-size: 9px; letter-spacing: .15em; color: var(--gray-mid); padding-top: 2px; text-transform: uppercase; }
+  .field-label span { display: block; font-size: 11px; color: #999; letter-spacing: .03em; margin-top: 3px; text-transform: none; font-family: var(--sans); font-weight: 300; }
+
+  input[type="date"], input[type="text"], textarea {
+    width: 100%; border: none; border-bottom: 1.5px solid var(--gray);
+    background: transparent; font-family: var(--sans); font-size: 13px;
+    color: var(--black); padding: 4px 0 6px; outline: none; resize: none;
+    transition: border-color .15s; line-height: 1.7;
+  }
+  input:focus, textarea:focus { border-bottom-color: var(--black); }
+  input::placeholder, textarea::placeholder { color: #CCC; }
+
+  .date-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .sublabel { font-family: var(--mono); font-size: 8px; letter-spacing: .12em; color: var(--gray-mid); margin-bottom: 4px; }
+
+  .format-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .fmt-btn { padding: 6px 13px; border: 1.5px solid var(--gray); background: transparent; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; cursor: pointer; color: #888; line-height: 1.6; transition: all .12s; }
+  .fmt-btn.on { background: var(--black); border-color: var(--black); color: var(--yellow); }
+  .fmt-custom { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .fmt-custom input { width: 140px !important; font-size: 12px !important; }
+
+  /* 슬라이드 */
+  .slides-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .slides-label { font-family: var(--mono); font-size: 9px; letter-spacing: .15em; color: var(--gray-mid); }
+  .add-slide-btn { background: var(--black); color: var(--yellow); border: none; padding: 5px 13px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; cursor: pointer; }
+  .add-slide-btn:hover { background: #333; }
+  .slides-list { display: flex; flex-direction: column; gap: 20px; }
+
+  .slide-card { border: 1.5px solid var(--gray); background: white; }
+  .slide-card-header { background: var(--gray); padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .slide-num { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; color: #888; }
+  .del-btn { background: none; border: none; cursor: pointer; font-family: var(--mono); font-size: 9px; color: #bbb; }
+  .del-btn:hover { color: #e00; }
+
+  .slide-body { display: flex; flex-direction: column; }
+
+  .drop-zone {
+    width: 100%; height: 220px;
+    border-bottom: 1.5px solid var(--gray);
+    position: relative; cursor: pointer; background: #F5F5F2;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; overflow: hidden; flex-shrink: 0; transition: background .15s;
+  }
+  .drop-zone:hover { background: #EDEDEA; }
+  .drop-zone.has-img .drop-hint { display: none; }
+  .drop-hint { text-align: center; pointer-events: none; }
+  .drop-hint .icon { font-size: 22px; color: #CCC; }
+  .drop-hint .hint-text { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; color: #CCC; }
+  .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; border: none; padding: 0; width: 100%; height: 100%; }
+  .drop-zone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .drop-zone.has-img img { display: block; }
+  .remove-img { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.55); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: none; align-items: center; justify-content: center; line-height: 1; }
+  .drop-zone.has-img .remove-img { display: flex; }
+
+  .lang-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .lang-cell { padding: 12px 14px; border-bottom: 1px solid var(--gray); border-right: 1px solid var(--gray); }
+  .lang-cell:nth-child(2n) { border-right: none; }
+  .lang-cell:nth-child(3), .lang-cell:nth-child(4) { border-bottom: none; }
+  .lang-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 8px; letter-spacing: .12em; color: #999; margin-bottom: 8px; }
+  .lang-tag .flag { font-size: 11px; }
+  .lang-tag.ko { color: #3B82F6; }
+  .lang-tag.en { color: #10B981; }
+  .lang-tag.jp { color: #EF4444; }
+  .lang-tag.tw { color: #8B5CF6; }
+  .lang-cell .sublabel-row { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; color: #CCC; margin-bottom: 4px; }
+  .lang-cell textarea { font-size: 12px; min-height: 44px; border-bottom: 1px solid var(--gray); background: transparent; line-height: 1.6; }
+  .lang-cell textarea:focus { border-bottom-color: var(--black); }
+  .lang-cell .body-ta { min-height: 40px; margin-top: 8px; }
+
+  /* ── 캡션 ── */
+  .caption-tabs { display: flex; border-bottom: 1.5px solid var(--gray); }
+  .ctab { padding: 6px 16px; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; cursor: pointer; border: none; background: transparent; color: var(--gray-mid); border-bottom: 1.5px solid transparent; margin-bottom: -1.5px; transition: all .12s; }
+  .ctab.on { color: var(--black); border-bottom-color: var(--black); }
+  .cpanel { display: none; padding-top: 14px; }
+  .cpanel.on { display: block; }
+
+  /* 언어별 캡션 블록 */
+  .cap-block { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--gray); }
+  .cap-block:last-child { border-bottom: none; margin-bottom: 0; }
+  .cap-block-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .cap-lang-tag { font-family: var(--mono); font-size: 8px; letter-spacing: .12em; display: flex; align-items: center; gap: 5px; }
+  .cap-lang-tag.ko { color: #3B82F6; }
+  .cap-lang-tag.en { color: #10B981; }
+  .cap-lang-tag.jp { color: #EF4444; }
+  .cap-lang-tag.tw { color: #8B5CF6; }
+
+  /* 글자수 카운터 */
+  .char-info { display: flex; align-items: center; gap: 10px; }
+  .char-count { font-family: var(--mono); font-size: 9px; color: var(--gray-mid); }
+  .char-count.warn { color: #F59E0B; }
+  .char-count.over { color: #EF4444; font-weight: 500; }
+  .char-limit-badge { font-family: var(--mono); font-size: 8px; color: #bbb; letter-spacing: .06em; }
+
+  .cap-block textarea { font-size: 12px; min-height: 64px; }
+
+  /* 번역 버튼 행 */
+  .cap-trans-row { display: flex; align-items: center; gap: 5px; margin-top: 8px; }
+  .cap-trans-label { font-family: var(--mono); font-size: 8px; color: #bbb; letter-spacing: .1em; }
+  .cap-tbtn { padding: 3px 10px; border: 1px solid var(--gray); background: transparent; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; cursor: pointer; color: #888; transition: all .12s; }
+  .cap-tbtn:hover { border-color: var(--black); color: var(--black); }
+  .cap-tbtn.loading { opacity: .4; pointer-events: none; }
+  .cap-tbtn.done { background: var(--black); color: var(--yellow); border-color: var(--black); }
+
+  .spin { display: inline-block; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .footer { background: var(--black); padding: 12px 32px; font-family: var(--mono); font-size: 8px; color: #444; letter-spacing: .08em; line-height: 1.9; }
+  .footer strong { color: #666; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toolbar-id" id="toolbarId">PURE · 콘텐츠 기획서</div>
+  <button class="btn" onclick="openPrint()">PDF 저장</button>
+</div>
+
+<div class="sheet">
+  <div class="header">
+    <div>
+      <div class="header-brand">PVRE PHARMACY — CONTENT BRIEF</div>
+      <div class="header-title">콘텐츠 기획서</div>
+    </div>
+    <div>
+      <div class="doc-num-label">DOC NO.</div>
+      <div class="doc-num" id="docNum">—</div>
+    </div>
+  </div>
+
+  <div class="fields">
+
+    <!-- 일정 -->
+    <div class="field-row">
+      <div class="field-label">일정<span>Schedule</span></div>
+      <div>
+        <div class="date-trio">
+          <div><div class="sublabel">디자인 요청일</div><input type="date"></div>
+          <div><div class="sublabel">디자인 전달일</div><input type="date"></div>
+          <div><div class="sublabel">업로드일</div><input type="date"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 포맷 -->
+    <div class="field-row">
+      <div class="field-label">포맷 / 사이즈<span>Format</span></div>
+      <div>
+        <div class="format-checks">
+          <button class="fmt-btn" onclick="toggle(this)">1080×1080<br><span style="font-size:8px;opacity:.6">IG Feed</span></button>
+          <button class="fmt-btn" onclick="toggle(this)">1080×1350<br><span style="font-size:8px;opacity:.6">IG Feed 4:5</span></button>
+          <button class="fmt-btn" onclick="toggle(this)">1080×1920<br><span style="font-size:8px;opacity:.6">Story / Reels</span></button>
+          <button class="fmt-btn" onclick="toggle(this)">카드뉴스<br><span style="font-size:8px;opacity:.6">Carousel</span></button>
+          <button class="fmt-btn" onclick="toggle(this)">Threads<br><span style="font-size:8px;opacity:.6">텍스트+이미지</span></button>
+          <button class="fmt-btn" onclick="toggle(this)">X / Twitter<br><span style="font-size:8px;opacity:.6">1200×675</span></button>
+        </div>
+        <div class="fmt-custom">
+          <span style="font-family:var(--mono);font-size:9px;color:#aaa;letter-spacing:.1em;">기타</span>
+          <input type="text" placeholder="예: 750×1000">
+        </div>
+      </div>
+    </div>
+
+    <!-- 디자인 요청 -->
+    <div class="field-row">
+      <div class="field-label">디자인 요청<span>Slides</span></div>
+      <div>
+        <div class="slides-header">
+          <div class="slides-label">슬라이드별 구성</div>
+          <button class="add-slide-btn" onclick="addSlide()">+ 슬라이드 추가</button>
+        </div>
+        <div class="slides-list" id="slidesList"></div>
+      </div>
+    </div>
+
+    <!-- 캡션 -->
+    <div class="field-row">
+      <div class="field-label">캡션<span>Caption</span></div>
+      <div>
+        <div class="caption-tabs">
+          <button class="ctab on" onclick="switchCap('ig',this)">Instagram</button>
+          <button class="ctab" onclick="switchCap('th',this)">Threads</button>
+          <button class="ctab" onclick="switchCap('x',this)">X</button>
+        </div>
+
+        <!-- Instagram -->
+        <div id="cp-ig" class="cpanel on">
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag ko">🇰🇷 KO</span>
+              <div class="char-info">
+                <span class="char-limit-badge">권장 125자</span>
+                <span class="char-count" id="cc-ig-ko">0</span>
+              </div>
+            </div>
+            <textarea id="ta-ig-ko" rows="3" placeholder="피드 캡션 + 해시태그 (한국어)&#10;#퓨어약국 #PvrePharmacy" oninput="countChars('ig-ko',2200)"></textarea>
+            <div class="cap-trans-row">
+              <span class="cap-trans-label">번역</span>
+              <button class="cap-tbtn" onclick="capTranslate('ig-ko','EN','ig-en')">EN</button>
+              <button class="cap-tbtn" onclick="capTranslate('ig-ko','JP','ig-jp')">JP</button>
+              <button class="cap-tbtn" onclick="capTranslate('ig-ko','TW','ig-tw')">繁</button>
+            </div>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag en">🌏 EN</span>
+              <div class="char-info">
+                <span class="char-limit-badge">권장 125자</span>
+                <span class="char-count" id="cc-ig-en">0</span>
+              </div>
+            </div>
+            <textarea id="ta-ig-en" rows="3" placeholder="Caption + hashtags (English)&#10;#PvrePharmacy #Kbeauty" oninput="countChars('ig-en',2200)"></textarea>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag jp">🇯🇵 JP</span>
+              <div class="char-info">
+                <span class="char-limit-badge">권장 125자</span>
+                <span class="char-count" id="cc-ig-jp">0</span>
+              </div>
+            </div>
+            <textarea id="ta-ig-jp" rows="3" placeholder="キャプション + ハッシュタグ（日本語）&#10;#韓国薬局 #Kビューティー" oninput="countChars('ig-jp',2200)"></textarea>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag tw">🇹🇼 繁</span>
+              <div class="char-info">
+                <span class="char-limit-badge">권장 125자</span>
+                <span class="char-count" id="cc-ig-tw">0</span>
+              </div>
+            </div>
+            <textarea id="ta-ig-tw" rows="3" placeholder="說明文字 + 標籤（繁體中文）&#10;#韓國藥局 #K美妝" oninput="countChars('ig-tw',2200)"></textarea>
+          </div>
+        </div>
+
+        <!-- Threads -->
+        <div id="cp-th" class="cpanel">
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag ko">🇰🇷 KO</span>
+              <div class="char-info">
+                <span class="char-limit-badge">최대 500자</span>
+                <span class="char-count" id="cc-th-ko">0</span>
+              </div>
+            </div>
+            <textarea id="ta-th-ko" rows="3" placeholder="Threads 포스트 (TikTok 언급 금지 / 구어체 / 리플 유도 포함)" oninput="countChars('th-ko',500)"></textarea>
+            <div class="cap-trans-row">
+              <span class="cap-trans-label">번역</span>
+              <button class="cap-tbtn" onclick="capTranslate('th-ko','EN','th-en')">EN</button>
+              <button class="cap-tbtn" onclick="capTranslate('th-ko','JP','th-jp')">JP</button>
+              <button class="cap-tbtn" onclick="capTranslate('th-ko','TW','th-tw')">繁</button>
+            </div>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag en">🌏 EN</span>
+              <div class="char-info"><span class="char-limit-badge">최대 500자</span><span class="char-count" id="cc-th-en">0</span></div>
+            </div>
+            <textarea id="ta-th-en" rows="3" placeholder="Threads post (English)" oninput="countChars('th-en',500)"></textarea>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag jp">🇯🇵 JP</span>
+              <div class="char-info"><span class="char-limit-badge">최대 500자</span><span class="char-count" id="cc-th-jp">0</span></div>
+            </div>
+            <textarea id="ta-th-jp" rows="3" placeholder="Threadsの投稿（TikTok言及禁止）" oninput="countChars('th-jp',500)"></textarea>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag tw">🇹🇼 繁</span>
+              <div class="char-info"><span class="char-limit-badge">최대 500자</span><span class="char-count" id="cc-th-tw">0</span></div>
+            </div>
+            <textarea id="ta-th-tw" rows="3" placeholder="Threads貼文（繁體中文）" oninput="countChars('th-tw',500)"></textarea>
+          </div>
+        </div>
+
+        <!-- X -->
+        <div id="cp-x" class="cpanel">
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag ko">🇰🇷 KO</span>
+              <div class="char-info">
+                <span class="char-limit-badge">최대 140자 (이모지=2자)</span>
+                <span class="char-count" id="cc-x-ko">0</span>
+              </div>
+            </div>
+            <textarea id="ta-x-ko" rows="3" placeholder="X 포스트 (이모지 2자 카운트 주의)" oninput="countCharsX('x-ko')"></textarea>
+            <div class="cap-trans-row">
+              <span class="cap-trans-label">번역</span>
+              <button class="cap-tbtn" onclick="capTranslate('x-ko','EN','x-en')">EN</button>
+              <button class="cap-tbtn" onclick="capTranslate('x-ko','JP','x-jp')">JP</button>
+              <button class="cap-tbtn" onclick="capTranslate('x-ko','TW','x-tw')">繁</button>
+            </div>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag en">🌏 EN</span>
+              <div class="char-info"><span class="char-limit-badge">최대 140자 (이모지=2자)</span><span class="char-count" id="cc-x-en">0</span></div>
+            </div>
+            <textarea id="ta-x-en" rows="3" placeholder="X post (English)" oninput="countCharsX('x-en')"></textarea>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag jp">🇯🇵 JP</span>
+              <div class="char-info"><span class="char-limit-badge">최대 140자 (이모지=2자)</span><span class="char-count" id="cc-x-jp">0</span></div>
+            </div>
+            <textarea id="ta-x-jp" rows="3" placeholder="Xの投稿（日本語）" oninput="countCharsX('x-jp')"></textarea>
+          </div>
+          <div class="cap-block">
+            <div class="cap-block-header">
+              <span class="cap-lang-tag tw">🇹🇼 繁</span>
+              <div class="char-info"><span class="char-limit-badge">최대 140자 (이모지=2자)</span><span class="char-count" id="cc-x-tw">0</span></div>
+            </div>
+            <textarea id="ta-x-tw" rows="3" placeholder="X貼文（繁體中文）" oninput="countCharsX('x-tw')"></textarea>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <strong>광고 규제 준수</strong> · 효능·치료 표현 금지 · 가격 노출 금지 · 타 브랜드 비방 금지 · 협찬 표기 의무 (국가별 법규 적용)
+  </div>
+</div>
+
+<script>
+  const now = new Date();
+  const p = n => String(n).padStart(2,'0');
+  const id = `PURE-${now.getFullYear()}${p(now.getMonth()+1)}-001`;
+  document.getElementById('docNum').textContent = id;
+  document.getElementById('toolbarId').textContent = `${id} · 퓨어약국 콘텐츠 기획서`;
+
+  function openPrint(){
+    // 현재 DOM 그대로 복사 (입력값 포함)
+    const html = document.documentElement.cloneNode(true);
+
+    // textarea 입력값을 value 어트리뷰트로 고정 (저장 시 반영되도록)
+    const srcTas = document.querySelectorAll('textarea');
+    const dstTas = html.querySelectorAll('textarea');
+    srcTas.forEach((ta, i) => { if(dstTas[i]) dstTas[i].textContent = ta.value; });
+
+    // input[type=text], input[type=date] 값도 고정
+    const srcInputs = document.querySelectorAll('input[type=text], input[type=date]');
+    const dstInputs = html.querySelectorAll('input[type=text], input[type=date]');
+    srcInputs.forEach((inp, i) => { if(dstInputs[i]) dstInputs[i].setAttribute('value', inp.value); });
+
+    // 체크된 fmt-btn 상태 유지
+    const srcBtns = document.querySelectorAll('.fmt-btn');
+    const dstBtns = html.querySelectorAll('.fmt-btn');
+    srcBtns.forEach((btn, i) => {
+      if(btn.classList.contains('on') && dstBtns[i]) dstBtns[i].classList.add('on');
+    });
+
+    // 이미지 src 복사
+    const srcImgs = document.querySelectorAll('.drop-zone img');
+    const dstImgs = html.querySelectorAll('.drop-zone img');
+    srcImgs.forEach((img, i) => {
+      if(dstImgs[i] && img.src) {
+        dstImgs[i].setAttribute('src', img.src);
+        dstImgs[i].style.display = img.style.display;
+      }
+    });
+
+    // has-img 클래스 복사
+    const srcDzs = document.querySelectorAll('.drop-zone');
+    const dstDzs = html.querySelectorAll('.drop-zone');
+    srcDzs.forEach((dz, i) => {
+      if(dz.classList.contains('has-img') && dstDzs[i]) dstDzs[i].classList.add('has-img');
+    });
+
+    // 활성 캡션 탭 상태 복사
+    const srcCtabs = document.querySelectorAll('.ctab');
+    const dstCtabs = html.querySelectorAll('.ctab');
+    srcCtabs.forEach((t, i) => { if(t.classList.contains('on') && dstCtabs[i]) dstCtabs[i].classList.add('on'); });
+    const srcCpanels = document.querySelectorAll('.cpanel');
+    const dstCpanels = html.querySelectorAll('.cpanel');
+    srcCpanels.forEach((p, i) => { if(p.classList.contains('on') && dstCpanels[i]) dstCpanels[i].classList.add('on'); });
+
+    // 새 탭에 내용 직접 쓰기
+    const htmlStr = '<!DOCTYPE html>' + html.outerHTML;
+    const win = window.open('', '_blank');
+    if(win){
+      win.document.open();
+      win.document.write(htmlStr);
+      win.document.close();
+      win.document.title = 'pure_content_brief';
+    } else {
+      alert('팝업이 차단됐어요. 브라우저에서 팝업 허용 후 다시 시도해주세요.');
+    }
+  }
+
+  function toggle(btn){ btn.classList.toggle('on'); }
+
+  function switchCap(key, tab){
+    document.querySelectorAll('.ctab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.cpanel').forEach(p => p.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById('cp-' + key).classList.add('on');
+  }
+
+  // ── 글자수 카운터 (일반) ──
+  function countChars(id, limit){
+    const ta = document.getElementById('ta-' + id);
+    const cc = document.getElementById('cc-' + id);
+    if(!ta || !cc) return;
+    const len = ta.value.length;
+    cc.textContent = len + '자';
+    cc.className = 'char-count';
+    if(limit && len > limit * 0.9) cc.classList.add('warn');
+    if(limit && len > limit) cc.classList.add('over');
+  }
+
+  // ── X 글자수: 이모지=2자 ──
+  function countCharsX(id){
+    const ta = document.getElementById('ta-' + id);
+    const cc = document.getElementById('cc-' + id);
+    if(!ta || !cc) return;
+    let count = 0;
+    for(const ch of ta.value){
+      const cp = ch.codePointAt(0);
+      // 이모지 범위 (Emoji_Presentation 기준 근사)
+      count += (cp > 0xFFFF || (cp >= 0x2600 && cp <= 0x27BF) || (cp >= 0x1F000)) ? 2 : 1;
+    }
+    cc.textContent = count + '/140';
+    cc.className = 'char-count';
+    if(count > 126) cc.classList.add('warn');
+    if(count > 140) cc.classList.add('over');
+  }
+
+  // ── 캡션 번역 ──
+  async function capTranslate(srcId, lang, destId){
+    const srcEl = document.getElementById('ta-' + srcId);
+    const src = srcEl?.value?.trim();
+    if(!src){ alert('번역할 텍스트를 먼저 입력해주세요.'); return; }
+
+    // 어떤 플랫폼인지 감지 → 톤 지시
+    const platform = srcId.startsWith('ig') ? 'Instagram' : srcId.startsWith('th') ? 'Threads' : 'X(Twitter)';
+    const toneMap = {
+      'Instagram': '자연스럽고 친근한 SNS 캡션 톤. 해시태그 포함.',
+      'Threads': srcId.includes('jp') ? '〜じゃん / 〜だよ 같은 캐주얼 구어체. TikTok 언급 금지.' :
+                 srcId.includes('tw') ? '欸 / 啦 같은 대만 인터넷 구어체.' : '짧고 솔직한 구어체.',
+      'X(Twitter)': '짧고 임팩트 있는 문체. 이모지 절제.'
+    };
+    const langMap = { EN:'영어', JP:'일본어', TW:'번체 중국어(대만)' };
+    const langLabel = langMap[lang];
+
+    // 버튼 로딩
+    const btns = srcEl.closest('.cap-block').querySelectorAll('.cap-tbtn');
+    const targetBtn = [...btns].find(b => b.textContent.trim() === (lang==='TW'?'繁':lang));
+    if(targetBtn){ targetBtn.classList.add('loading'); targetBtn.innerHTML = '<span class="spin">↻</span>'; }
+
+    const prompt = `아래 한국어 ${platform} 캡션을 ${langLabel}로 번역해줘.
+퓨어약국은 서울 성수·명동의 외국인 관광객 대상 K-뷰티 약국이야.
+톤 지침: ${toneMap[platform]}
+과장 표현 없이, 한국 의약품 광고 규정 준수. 번역 결과 텍스트만 출력. 설명 없이.
+
+원문:
+${src}`;
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      const translated = data?.result?.trim() || '번역 실패';
+      const destEl = document.getElementById('ta-' + destId);
+      if(destEl){
+        destEl.value = translated;
+        // 카운터 업데이트
+        if(destId.startsWith('x-')) countCharsX(destId);
+        else countChars(destId, destId.startsWith('th-') ? 500 : 2200);
+      }
+    } catch(e) {
+      alert('번역 중 오류가 발생했습니다.');
+    } finally {
+      if(targetBtn){
+        targetBtn.classList.remove('loading');
+        targetBtn.classList.add('done');
+        targetBtn.textContent = lang === 'TW' ? '繁' : lang;
+        setTimeout(() => targetBtn.classList.remove('done'), 2000);
+      }
+    }
+  }
+
+  // ── 슬라이드 ──
+  let slideCount = 0;
+
+  function addSlide(){
+    slideCount++;
+    const n = slideCount;
+    const list = document.getElementById('slidesList');
+    const card = document.createElement('div');
+    card.className = 'slide-card';
+    card.id = 'slide-' + n;
+    card.innerHTML = `
+      <div class="slide-card-header">
+        <span class="slide-num">SLIDE ${String(n).padStart(2,'0')}</span>
+        <button class="del-btn" onclick="document.getElementById('slide-${n}').remove()">삭제</button>
+      </div>
+      <div class="slide-body">
+        <div class="drop-zone" id="dz-${n}">
+          <div class="drop-hint">
+            <div class="icon">＋</div>
+            <div class="hint-text">이미지 클릭 업로드</div>
+          </div>
+          <img id="img-${n}" src="" alt="">
+          <button class="remove-img" onclick="removeImg(event,${n})">×</button>
+          <input type="file" id="file-${n}" accept="image/*" onchange="loadImg(event,${n})">
+        </div>
+        <div class="lang-grid">
+          <!-- KO: 번역 버튼 포함 -->
+          <div class="lang-cell">
+            <div class="lang-tag ko"><span class="flag">🇰🇷</span> KO</div>
+            <div class="sublabel-row">HEADLINE</div>
+            <textarea id="sl-${n}-ko-hl" rows="1" placeholder="메인 카피 (한국어)"></textarea>
+            <div class="sublabel-row" style="margin-top:8px;">BODY</div>
+            <textarea id="sl-${n}-ko-bd" class="body-ta" rows="2" placeholder="본문 / 성분 설명 (한국어)"></textarea>
+            <div class="cap-trans-row" style="margin-top:8px;">
+              <span class="cap-trans-label">번역</span>
+              <button class="cap-tbtn" onclick="slideTranslate(${n},'EN')">EN</button>
+              <button class="cap-tbtn" onclick="slideTranslate(${n},'JP')">JP</button>
+              <button class="cap-tbtn" onclick="slideTranslate(${n},'TW')">繁</button>
+              <button class="cap-tbtn" onclick="slideTranslate(${n},'ALL')" style="margin-left:4px;">전체</button>
+            </div>
+          </div>
+          <div class="lang-cell">
+            <div class="lang-tag en"><span class="flag">🌏</span> EN</div>
+            <div class="sublabel-row">HEADLINE</div>
+            <textarea id="sl-${n}-en-hl" rows="1" placeholder="Main copy (English)"></textarea>
+            <div class="sublabel-row" style="margin-top:8px;">BODY</div>
+            <textarea id="sl-${n}-en-bd" class="body-ta" rows="2" placeholder="Body text (English)"></textarea>
+          </div>
+          <div class="lang-cell">
+            <div class="lang-tag jp"><span class="flag">🇯🇵</span> JP</div>
+            <div class="sublabel-row">HEADLINE</div>
+            <textarea id="sl-${n}-jp-hl" rows="1" placeholder="メインコピー（日本語）"></textarea>
+            <div class="sublabel-row" style="margin-top:8px;">BODY</div>
+            <textarea id="sl-${n}-jp-bd" class="body-ta" rows="2" placeholder="本文テキスト（日本語）"></textarea>
+          </div>
+          <div class="lang-cell">
+            <div class="lang-tag tw"><span class="flag">🇹🇼</span> 繁</div>
+            <div class="sublabel-row">HEADLINE</div>
+            <textarea id="sl-${n}-tw-hl" rows="1" placeholder="主要文案（繁體中文）"></textarea>
+            <div class="sublabel-row" style="margin-top:8px;">BODY</div>
+            <textarea id="sl-${n}-tw-bd" class="body-ta" rows="2" placeholder="內文說明（繁體中文）"></textarea>
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  }
+
+  function loadImg(e, n){
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('img-' + n).src = ev.target.result;
+      document.getElementById('dz-' + n).classList.add('has-img');
+    };
+    reader.readAsDataURL(file);
+  }
+  function removeImg(e, n){
+    e.stopPropagation();
+    document.getElementById('img-' + n).src = '';
+    document.getElementById('dz-' + n).classList.remove('has-img');
+    document.getElementById('file-' + n).value = '';
+  }
+
+  // ── 슬라이드 카피 번역 ──
+  async function slideTranslate(n, lang){
+    const koHl = document.getElementById(`sl-${n}-ko-hl`)?.value?.trim();
+    const koBd = document.getElementById(`sl-${n}-ko-bd`)?.value?.trim();
+    if(!koHl && !koBd){ alert('KO 칸에 텍스트를 먼저 입력해주세요.'); return; }
+
+    const targets = lang === 'ALL' ? ['EN','JP','TW'] : [lang];
+    const langMap = { EN:'영어', JP:'일본어', TW:'번체 중국어(대만)' };
+    const langCode = { EN:'en', JP:'jp', TW:'tw' };
+
+    // 버튼 로딩
+    const btns = document.querySelectorAll(`#slide-${n} .cap-tbtn`);
+    btns.forEach(b => {
+      const t = b.textContent.trim();
+      if(lang === 'ALL' || t === (lang==='TW'?'繁':lang) || t === '전체'){
+        b.classList.add('loading'); b.innerHTML = '<span class="spin">↻</span>';
+      }
+    });
+
+    for(const tl of targets){
+      const prompt = `아래 카드뉴스 카피를 ${langMap[tl]}로 번역해줘.
+퓨어약국은 서울 성수·명동의 외국인 관광객 대상 K-뷰티 약국이야.
+SNS 카드뉴스용으로 간결하고 자연스럽게. 과장 표현 없이. 한국 의약품 광고 규정 준수.
+JSON 형식으로만 출력: {"hl":"번역된 헤드라인","bd":"번역된 본문"}
+
+HEADLINE: ${koHl || ''}
+BODY: ${koBd || ''}`;
+
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        const raw = data?.result?.trim() || '{}';
+        const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+        const lc = langCode[tl];
+        const hlEl = document.getElementById(`sl-${n}-${lc}-hl`);
+        const bdEl = document.getElementById(`sl-${n}-${lc}-bd`);
+        if(hlEl && parsed.hl) hlEl.value = parsed.hl;
+        if(bdEl && parsed.bd) bdEl.value = parsed.bd;
+      } catch(e) {
+        console.error(tl, e);
+      }
+    }
+
+    // 버튼 복원
+    btns.forEach(b => {
+      b.classList.remove('loading');
+      const t = b.getAttribute('onclick') || '';
+      if(t.includes("'EN'")) b.textContent = 'EN';
+      else if(t.includes("'JP'")) b.textContent = 'JP';
+      else if(t.includes("'TW'")) b.textContent = '繁';
+      else if(t.includes("'ALL'")) b.textContent = '전체';
+      b.classList.add('done');
+      setTimeout(() => b.classList.remove('done'), 2000);
+    });
+  }
+
+  addSlide(); addSlide(); addSlide();
+</script>
+</body>
+</html>
