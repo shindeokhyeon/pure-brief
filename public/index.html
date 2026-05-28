@@ -263,9 +263,15 @@
     const dstCpanels = html.querySelectorAll('.cpanel');
     srcCpanels.forEach((p, i) => { if(p.classList.contains('on') && dstCpanels[i]) dstCpanels[i].classList.add('on'); });
     const htmlStr = '<!DOCTYPE html>' + html.outerHTML;
-    const win = window.open('', '_blank');
-    if(win){ win.document.open(); win.document.write(htmlStr); win.document.close(); }
-    else { alert('팝업 허용 후 다시 시도해주세요.'); }
+    const blob = new Blob([htmlStr], {type: 'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pure_brief_' + new Date().toISOString().slice(0,10) + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function toggle(btn){ btn.classList.toggle('on'); }
