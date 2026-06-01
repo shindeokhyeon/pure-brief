@@ -395,17 +395,21 @@
   }
 
   function loadImg(e, n){
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => { document.getElementById('img-'+n).src = ev.target.result; document.getElementById('dz-'+n).classList.add('has-img'); };
-    reader.readAsDataURL(file);
-  }
-  function removeImg(e, n){
-    e.stopPropagation();
-    document.getElementById('img-'+n).src = '';
-    document.getElementById('dz-'+n).classList.remove('has-img');
-    document.getElementById('file-'+n).value = '';
-  }
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('img-'+n);
+    const dz = document.getElementById('dz-'+n);
+    img.src = ev.target.result;
+    img.onload = () => {
+      const ratio = img.naturalHeight / img.naturalWidth;
+      const w = dz.offsetWidth;
+      dz.style.height = Math.round(w * ratio) + 'px';
+    };
+    dz.classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
 
   async function slideTranslate(n, lang){
     const koHl = document.getElementById(`sl-${n}-ko-hl`)?.value?.trim();
